@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"gotinyurl/internal/storage"
 	"log"
 	"net/http"
 
@@ -16,7 +17,7 @@ func main() {
 		Addr: "redis:6379",
 	})
 
-	// interal code !
+	store := storage.NewRedisStore(redisClient, ctx)
 
 	r := mux.NewRouter()
 
