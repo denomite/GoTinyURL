@@ -1,9 +1,12 @@
 package service
 
 import (
-	"crypto/sha1"
-	"encoding/hex"
+	"math/rand"
+	"time"
 )
+
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+const codeLength = 6
 
 type Store interface {
 	Save(short, original string) error
@@ -12,20 +15,33 @@ type Store interface {
 
 type Service struct {
 	store Store
+	rand  *rand.Rand
 }
 
 func NewService(s Store) *Service {
-	return &Service{store: s}
+	src := rand.NewSource(time.Now().UnixNano())
+	return &Service{store: s, rand: rand.New(src)}
+}
+
+func (s *Service) generateRandomCode(n int) string {
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = charset[s.rand.Intn(len(charset))]
+	}
+	return string(b)
 }
 
 func (s *Service) Shorten(url string) (string, error) {
-	h := sha1.New()
-	h.Write([]byte(url))
-	short := hex.EncodeToString(h.Sum(nil))[:6]
-	if err := s.store.Save(short, url); err != nil {
-		return "", err
+	for {
+		short := s.generateRandomCode(codeLength)
+		_, err := s.store.Get(short)
+		if err != nil {
+			if saveErr := s.store.Save(short, url); saveErr != nil {
+				return "", saveErr
+			}
+			return short, nil
+		}
 	}
-	return short, nil
 }
 
 func (s *Service) Resolve(short string) (string, error) {
