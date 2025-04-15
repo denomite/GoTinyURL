@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"gotinyurl/internal/handler"
 	"gotinyurl/internal/service"
 	"gotinyurl/internal/storage"
 	"log"
@@ -20,8 +21,11 @@ func main() {
 
 	store := storage.NewRedisStore(rdb, ctx)
 	service := service.NewService(store)
+	h := handler.NewHandler(service)
 
 	r := mux.NewRouter()
+	r.HandleFunc("/shorten", h.ShortenURL).Methods("POST")
+	r.HandleFunc("/{short}", h.Redirect).Methods("GET")
 
 	log.Println("Server started on :8080")
 	log.Fatal(http.ListenAndServe(":8080", r))
