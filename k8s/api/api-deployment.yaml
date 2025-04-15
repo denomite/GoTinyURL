@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: gotinyurl-api
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: gotinyurl
+    template:
+        metadata:
+            labels:
+                app: gotinyurl
+        spec:
+            containers:
+                - name: gotinyurl
+                  image: yourdockerhubusername/gotinyurl:latest
+                  ports:
+                      - containerPort: 8080
+                  env:
+                      - name: REDIS_ADDR
+                        value: 'redis:6379'
