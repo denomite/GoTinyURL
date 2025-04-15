@@ -4,4 +4,4 @@
 
 ## Tech stack
 
-    - Go, Redis, Docker, Kubernetee and gorilla mux
+    - Go, Redis, Docker, Kubernetee and Gorilla mux
